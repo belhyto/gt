@@ -1,40 +1,36 @@
 import numpy as np
 
-def analyze_game(matrix):
-    """Analyze 2x2 matrix game for saddle points and mixed strategies"""
-    # Saddle point detection
-    saddle_points = []
-    for i in range(2):
-        row_min = min(matrix[i])
-        for j in range(2):
-            col_max = max(matrix[:,j])
-            if matrix[i][j] == row_min and matrix[i][j] == col_max:
-                saddle_points.append(matrix[i][j])
+# Get matrix dimensions
+R = int(input("Enter the number of rows: "))
+C = int(input("Enter the number of columns: "))
 
-    # Mixed strategy calculation (if no saddle point)
-    if not saddle_points:
-        a, b, c, d = matrix[0][0], matrix[0][1], matrix[1][0], matrix[1][1]
-        denominator = (a + d) - (b + c)
+# Input matrix entries
+print("Enter the entries in a single line (separated by space): ")
+entries = list(map(int, input().split()))
 
-        if denominator != 0:
-            p = (d - c) / denominator
-            q = (d - b) / denominator
-        else:  # Handle zero denominator case
-            p, q = 0.5, 0.5
+# Create matrix
+A = np.array(entries).reshape(R, C)
+print("\nMatrix:\n", A)
 
-        return {
-            'saddle_point': None,
-            'row_strategy': [p, 1-p],
-            'col_strategy': [q, 1-q]
-        }
+# Saddle point detection
+row_mins = np.min(A, axis=1)  # Min of each row
+col_maxes = np.max(A, axis=0)  # Max of each column
+saddle_points = A[(A == row_mins[:, None]) & (A == col_maxes[None, :])]
 
-    return {'saddle_point': saddle_points[0]}
-
-# Example usage
-game_matrix = np.array([[3, 1], [2, 4]])
-result = analyze_game(game_matrix)
-
-if result['saddle_point']:
-    print(f"Saddle point found: {result['saddle_point']}")
+if saddle_points.size > 0:
+    print(f"\nSaddle point found: {saddle_points[0]}")
 else:
-    print(f"Mixed strategies:\nRow: {result['row_strategy']}\nColumn: {result['col_strategy']}")
+    print("\nNo saddle point found")
+
+# Mixed strategy for 2x2 matrix
+if R == C == 2:
+    a, b, c, d = A[0, 0], A[0, 1], A[1, 0], A[1, 1]
+    denom = (a + d) - (b + c)
+    if denom != 0:
+        p1 = (d - c) / denom
+        q1 = (d - b) / denom
+    else:
+        p1 = q1 = 0.5
+    p2 = 1 - p1
+    q2 = 1 - q1
+    print(f"\nMixed strategies:\np1 = {p1:.2f}, p2 = {p2:.2f}, q1 = {q1:.2f}, q2 = {q2:.2f}\n")
